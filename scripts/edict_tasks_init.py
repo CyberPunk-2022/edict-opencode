@@ -56,12 +56,17 @@ def main():
     ap = argparse.ArgumentParser(description="Initialize edict-tasks.json for OpenCode edict")
     ap.add_argument("--path", default=".", help="Project root; creates <path>/.edict/edict-tasks.json")
     ap.add_argument("--demo", action="store_true", help="Add one demo task in Pending state")
+    ap.add_argument("--force", action="store_true", help="Overwrite existing edict-tasks.json")
     args = ap.parse_args()
 
     root = os.path.abspath(args.path)
     edict_dir = os.path.join(root, ".edict")
     os.makedirs(edict_dir, exist_ok=True)
     out_path = os.path.join(edict_dir, "edict-tasks.json")
+
+    if os.path.isfile(out_path) and not args.force:
+        print(f"Already exists: {out_path} (use --force to overwrite)")
+        return
 
     tasks = []
     if args.demo:

@@ -117,31 +117,38 @@ function getBootstrapContent(directory) {
 
   const directive = `## 三省六部任务编排（Edict for OpenCode）
 
+**语言要求：你必须全程使用中文输出。包括但不限于：对话内容、阶段标题、Shell 命令描述、进展说明等，一律使用中文。唯一例外是代码和命令本身。**
+
 **IMPORTANT: edict-orchestrator skill 内容已包含在下方，你正在遵循它。不要再通过 skill 工具重复加载 edict-orchestrator。**
 
 你当前处于**三省六部**制度下的任务协作上下文。
 
 ### 核心规则（必须严格遵守）
 
-1. **任何用户需求，必须先创建 edict 任务**：收到用户的工作请求后，第一步执行 \`python .edict/scripts/edict_tasks_api.py create "任务标题"\`，获得 task_id。
-2. **按状态机推进**：创建后以太子身份 advance → 中书规划 → 门下审议 → 尚书派发 → 六部执行 → Review → Done，每一步都通过 \`edict_tasks_api.py\` 推进，不可跳过。
+1. **涉及代码/文件变更的需求，必须先创建 edict 任务**：收到用户的工作请求后，如果需要新增、修改、删除代码或文件，第一步执行 \`python .edict/scripts/edict_tasks_api.py create "任务标题"\`，获得 task_id。纯粹的问答（如"这段代码是什么意思"）可以直接回答，但**不允许在问答中顺手修改或删除代码**，如需改动请告知用户并走流程。
+2. **按状态机推进**：创建后以太子身份 advance → 中书规划 → 门下审议 → 尚书派发 → 六部执行 → 尚书汇总 → 完成，每一步都通过 \`edict_tasks_api.py\` 推进，不可跳过。
 3. **不要直接开始写代码**：在任务未经过中书规划、门下审议之前，禁止直接进入实现阶段。
 4. **所有状态变更**通过 \`python .edict/scripts/edict_tasks_api.py\` 完成，禁止直接修改 \`.edict/edict-tasks.json\`。
 
 ### 标准流程（每次收到用户请求时执行）
 
 \`\`\`
-1. python .edict/scripts/edict_tasks_api.py create "用户需求标题"        → 获得 TASK_ID
-2. python .edict/scripts/edict_tasks_api.py advance TASK_ID taizi --remark "分拣完毕"   → Taizi → Zhongshu
-3. 以 zhongshu 身份：分析需求、规划方案、汇报 progress
-4. python .edict/scripts/edict_tasks_api.py advance TASK_ID zhongshu --remark "方案提交审议" → Zhongshu → Menxia
-5. 以 menxia 身份：审议方案
-6. python .edict/scripts/edict_tasks_api.py review TASK_ID menxia approve --comment "准奏"  → Menxia → Assigned
-7. python .edict/scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "派发执行"     → Assigned → Doing
-8. 以六部身份执行具体工作（写代码/文档/测试等），用 progress 汇报
-9. python .edict/scripts/edict_tasks_api.py advance TASK_ID <六部> --remark "执行完毕"       → Doing → Review
-10. python .edict/scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "汇总完成"    → Review → Done
-\`\`\``;
+【待处理】  python .edict/scripts/edict_tasks_api.py create "用户需求标题"
+【太子分拣】python .edict/scripts/edict_tasks_api.py advance TASK_ID taizi --remark "分拣完毕"
+【中书省起草】分析需求、规划方案，用 progress 汇报，然后提交审议：
+            python .edict/scripts/edict_tasks_api.py advance TASK_ID zhongshu --remark "方案提交审议"
+【门下省审议】审议方案：
+            python .edict/scripts/edict_tasks_api.py review TASK_ID menxia approve --comment "准奏"
+【尚书省派发】派发执行：
+            python .edict/scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "派发执行"
+【六部执行】以六部身份执行具体工作（写代码/文档/测试等），用 progress 汇报，完成后：
+            python .edict/scripts/edict_tasks_api.py advance TASK_ID <六部id> --remark "执行完毕"
+【尚书省汇总】汇总结果：
+            python .edict/scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "汇总完成"
+\`\`\`
+
+**重要：输出阶段标题时，必须使用中文名称**（如"太子分拣"、"中书省起草"、"门下省审议"、"尚书省派发"、"六部执行"、"尚书省汇总"）。
+禁止使用英文状态码（Taizi、Zhongshu、Menxia、Libu 等）作为标题或标签。`;
 
   const toolMapping = `### OpenCode 工具映射
 

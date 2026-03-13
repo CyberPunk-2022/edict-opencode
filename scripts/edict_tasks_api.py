@@ -24,6 +24,18 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Windows 终端默认 GBK，无法输出 emoji / 部分中文，强制 UTF-8
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+    try:
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 # 状态机：当前状态 -> (下一状态, 来自部门名, 去向部门名, 说明)
 _STATE_FLOW = {
     "Pending": ("Taizi", "皇上", "太子", "待处理旨意转交太子分拣"),
@@ -123,6 +135,15 @@ def _load_agent_config():
     if env_path and os.path.isfile(env_path):
         with open(env_path, encoding="utf-8") as f:
             return json.load(f)
+    # 1) 脚本所在目录的 .edict-plugin-root 记录了插件仓库根路径
+    hint = _script_dir() / ".edict-plugin-root"
+    if hint.is_file():
+        plugin_root = Path(hint.read_text(encoding="utf-8").strip())
+        cfg = plugin_root / "agent_config.json"
+        if cfg.is_file():
+            with open(cfg, encoding="utf-8") as f:
+                return json.load(f)
+    # 2) fallback: 脚本在 edict-opencode/scripts/ 时，上级就是仓库根
     root = _repo_root()
     cfg_path = root / "agent_config.json"
     if cfg_path.is_file():
@@ -185,7 +206,7 @@ def cmd_create(title: str, priority: str = "normal") -> int:
     if tasks_list is None:
         print("ERROR: edict-tasks.json not found. Run edict_tasks_init.py first.", file=sys.stderr)
         return 1
-    today = datetime.utcnow().strftime("%Y%m%d")
+    today = datetime.now(timezone.utc).strftime("%Y%m%d")
     seq = 1
     for t in tasks_list:
         tid = t.get("id", "")

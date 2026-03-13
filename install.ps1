@@ -16,11 +16,18 @@ $repoUrl    = "https://github.com/CyberPunk-2022/edict-opencode.git"
 Write-Host "Installing edict-opencode for OpenCode..."
 
 # Detect if running from local clone
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $scriptDir) { $scriptDir = $PWD.Path }
-$localMarker = Join-Path $scriptDir "agent_config.json"
+$scriptDir = $null
+try {
+    $p = $MyInvocation.MyCommand.Path
+    if ($p) { $scriptDir = Split-Path -Parent $p }
+} catch { }
+$isLocal = $false
+if ($scriptDir) {
+    $marker = Join-Path $scriptDir "agent_config.json"
+    if (Test-Path $marker) { $isLocal = $true }
+}
 
-if (Test-Path $localMarker) {
+if ($isLocal) {
     # Local install: junction from config dir to current directory
     $sourceDir = $scriptDir
     if ((Resolve-Path $sourceDir).Path -ne (Resolve-Path $installDir -ErrorAction SilentlyContinue).Path) {
@@ -69,5 +76,7 @@ Write-Host "  Skills : $skillLink"
 Write-Host ""
 Write-Host "Restart OpenCode to activate."
 Write-Host ""
-Write-Host "Quick start in any project:"
-Write-Host "  python $sourceDir\scripts\edict_tasks_init.py --path . --demo"
+Write-Host "First time? Initialize a project:"
+Write-Host "  python `"$sourceDir\scripts\edict_tasks_init.py`" --path <your-project>"
+Write-Host ""
+Write-Host "  (Existing .edict/edict-tasks.json will NOT be overwritten unless you pass --force)"
