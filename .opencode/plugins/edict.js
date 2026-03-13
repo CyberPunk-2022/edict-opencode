@@ -81,68 +81,91 @@ function copyEdictScripts(directory) {
 }
 
 /**
+ * 读取 edict-orchestrator/SKILL.md 并去掉 frontmatter
+ */
+function loadOrchestratorSkill() {
+  const candidates = [
+    path.join(pluginRoot, 'skills', 'edict-orchestrator', 'SKILL.md'),
+  ];
+  const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+  if (homeDir) {
+    candidates.push(path.join(homeDir, '.config', 'opencode', 'skills', 'edict', 'edict-orchestrator', 'SKILL.md'));
+  }
+  for (const p of candidates) {
+    try {
+      if (!fs.existsSync(p)) continue;
+      let content = fs.readFileSync(p, 'utf8');
+      const match = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+      if (match) content = match[1];
+      return content.trim();
+    } catch { /* skip */ }
+  }
+  return null;
+}
+
+/**
  * 构建注入到 system prompt 的 bootstrap 内容
  */
 function getBootstrapContent(directory) {
   const phaseHint = detectEdictPhase(directory);
+  const orchestratorContent = loadOrchestratorSkill();
 
-  const intro = `## 三省六部任务编排（Edict for OpenCode）
+  const directive = `## 三省六部任务编排（Edict for OpenCode）
 
-你当前处于**三省六部**制度下的任务协作上下文。所有任务流转必须通过**状态机 + 权限矩阵**完成，不得直接修改任务 JSON。
+**IMPORTANT: edict-orchestrator skill 内容已包含在下方，你正在遵循它。不要再通过 skill 工具重复加载 edict-orchestrator。**
 
-- **太子 (taizi)**：分拣旨意，转中书省
-- **中书省 (zhongshu)**：规划方案，拆解任务，提交门下审议
-- **门下省 (menxia)**：审议方案，准奏或封驳
-- **尚书省 (shangshu)**：派发执行，协调六部
-- **六部 (libu/hubu/bingbu/xingbu/gongbu/libu_hr)**：执行具体工作，完成后进入 Review`;
+你当前处于**三省六部**制度下的任务协作上下文。
 
-  const stateFlow = `### 状态机（_STATE_FLOW）
+### 核心规则（必须严格遵守）
 
-| 当前状态   | 下一状态  | 说明 |
-|------------|------------|------|
-| Pending    | Taizi      | 皇上下旨 → 太子分拣 |
-| Taizi      | Zhongshu   | 太子转中书省起草 |
-| Zhongshu   | Menxia     | 中书提交门下审议 |
-| Menxia     | Assigned   | 门下准奏 → 尚书派发 |
-| Assigned   | Doing      | 尚书派发六部执行 |
-| Doing      | Review     | 各部完成 → 尚书汇总 |
-| Review     | Done       | 全流程完成 |
+1. **任何用户需求，必须先创建 edict 任务**：收到用户的工作请求后，第一步执行 \`python scripts/edict_tasks_api.py create "任务标题"\`，获得 task_id。
+2. **按状态机推进**：创建后以太子身份 advance → 中书规划 → 门下审议 → 尚书派发 → 六部执行 → Review → Done，每一步都通过 \`edict_tasks_api.py\` 推进，不可跳过。
+3. **不要直接开始写代码**：在任务未经过中书规划、门下审议之前，禁止直接进入实现阶段。
+4. **所有状态变更**通过 \`python scripts/edict_tasks_api.py\` 完成，禁止直接修改 \`edict/edict-tasks.json\`。
 
-（另有 Next→Doing；封驳时 Menxia→Zhongshu；Stop/Resume/Cancel 见 API。）`;
+### 标准流程（每次收到用户请求时执行）
 
-  const permission = `### 权限矩阵（allowAgents）
-
-- **taizi** → 仅可调用 zhongshu
-- **zhongshu** → 仅可调用 menxia, shangshu
-- **menxia** → 仅可调用 shangshu, zhongshu
-- **shangshu** → 仅可调用六部（libu, hubu, bingbu, xingbu, gongbu, libu_hr）
-- **六部** → 不可越权调用其他 agent`;
-
-  const convention = `### 约定（必须遵守）
-
-1. **任务状态与流转**：只通过 \`edict_tasks_api.py\` 的子命令或 **edict-orchestrator** skill 推进，不要直接 \`read_file\`/\`write_file\` 修改 \`edict/edict-tasks.json\` 的 \`state\`、\`flow_log\`、\`progress_log\`。
-2. **调用方式**：在项目根目录执行 \`python scripts/edict_tasks_api.py <cmd> ...\`（若已通过插件复制到当前项目 \`scripts/\`）。创建任务用 \`create "标题"\`；推进状态用 \`advance <task_id> <caller_agent> [--remark "..."]\`；门下审议用 \`review <task_id> menxia approve|reject [--comment "..."]\`；汇报进展用 \`progress <task_id> <caller_agent> "进展说明" [--todos "1.xxx|2.yyy"]\`。
-3. **身份**：执行 advance/review/progress 时，\`caller_agent\` 必须与当前任务状态所规定的负责 agent 一致（见状态机与权限矩阵）。`;
+\`\`\`
+1. python scripts/edict_tasks_api.py create "用户需求标题"        → 获得 TASK_ID
+2. python scripts/edict_tasks_api.py advance TASK_ID taizi --remark "分拣完毕"   → Taizi → Zhongshu
+3. 以 zhongshu 身份：分析需求、规划方案、汇报 progress
+4. python scripts/edict_tasks_api.py advance TASK_ID zhongshu --remark "方案提交审议" → Zhongshu → Menxia
+5. 以 menxia 身份：审议方案
+6. python scripts/edict_tasks_api.py review TASK_ID menxia approve --comment "准奏"  → Menxia → Assigned
+7. python scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "派发执行"     → Assigned → Doing
+8. 以六部身份执行具体工作（写代码/文档/测试等），用 progress 汇报
+9. python scripts/edict_tasks_api.py advance TASK_ID <六部> --remark "执行完毕"       → Doing → Review
+10. python scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "汇总完成"    → Review → Done
+\`\`\``;
 
   const toolMapping = `### OpenCode 工具映射
 
 - 执行脚本：\`run_terminal_cmd\` 或 \`Bash\` 运行 \`python scripts/edict_tasks_api.py ...\`
-- 查看任务：可 \`read_file\` \`edict/edict-tasks.json\` 只读查看；修改状态/流转/进展一律通过上述 API
-- 使用 orchestrator：通过 \`skill\` 工具加载 \`edict/edict-orchestrator\`（若已安装），按 SKILL 说明传入 action、task_id、caller_agent 等`;
+- 查看任务：可 \`read_file\` 读取 \`edict/edict-tasks.json\` 只读查看
+- 修改状态/流转/进展：一律通过上述 API
 
-  return `<EXTREMELY_IMPORTANT>
-${intro}
+**Skill name format:**
+当需要加载各省部 skill 时，通过 OpenCode 的 skill 工具调用: skill({ name: "edict-orchestrator" })
+Skills 安装路径: ~/.config/opencode/skills/edict/`;
 
-${stateFlow}
-
-${permission}
-
-${convention}
+  let body = `${directive}
 
 ${toolMapping}
 
 ---
-${phaseHint}
+${phaseHint}`;
+
+  if (orchestratorContent) {
+    body += `
+
+---
+## edict-orchestrator 完整指引（已自动加载）
+
+${orchestratorContent}`;
+  }
+
+  return `<EXTREMELY_IMPORTANT>
+${body}
 </EXTREMELY_IMPORTANT>`;
 }
 
