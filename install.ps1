@@ -1,5 +1,5 @@
 # Edict for OpenCode installer (Windows PowerShell)
-# Usage:  irm https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/main/install.ps1 | iex
+# Usage:  irm https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/master/install.ps1 | iex
 #   or:   .\install.ps1              (from local clone)
 #
 # Requirements: Developer Mode enabled -OR- run as Administrator (for symlinks)

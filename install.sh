@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Edict for OpenCode installer (macOS / Linux)
-# Usage:  curl -fsSL https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/main/install.sh | bash
+# Usage:  curl -fsSL https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/master/install.sh | bash
 #   or:   bash install.sh            (from local clone)
 set -euo pipefail
 

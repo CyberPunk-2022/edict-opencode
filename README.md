@@ -7,13 +7,13 @@
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/master/install.sh | bash
 ```
 
 ### Windows（PowerShell，需开发者模式或管理员权限）
 
 ```powershell
-irm https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/master/install.ps1 | iex
 ```
 
 安装完成后**重启 OpenCode** 即可激活。
