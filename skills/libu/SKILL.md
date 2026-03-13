@@ -18,11 +18,11 @@ tags: [edict, libu, ministry]
 1. 读取任务详情和尚书省的派发说明，明确文档需求。
 2. 汇报开始：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID libu "已接到派发，开始编写文档..." --todos "1.整理大纲|2.编写内容🔄|3.排版校对"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID libu "已接到派发，开始编写文档..." --todos "1.整理大纲|2.编写内容🔄|3.排版校对"
    ```
 3. 完成后汇报结果：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID libu "文档编写完成" --todos "1.整理大纲✅|2.编写内容✅|3.排版校对✅"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID libu "文档编写完成" --todos "1.整理大纲✅|2.编写内容✅|3.排版校对✅"
    ```
 
 ## 权限
@@ -33,4 +33,4 @@ tags: [edict, libu, ministry]
 ## 禁止
 
 - 不要自己推进任务状态（advance）——由尚书省统一推进。
-- 不要直接修改 `edict/edict-tasks.json`。
+- 不要直接修改 `.edict/edict-tasks.json`。

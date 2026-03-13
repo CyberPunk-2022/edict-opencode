@@ -23,7 +23,7 @@ irm https://raw.githubusercontent.com/CyberPunk-2022/edict-opencode/main/install
 在任意项目目录中初始化任务看板：
 
 ```bash
-python scripts/edict_tasks_init.py --path . --demo
+python .edict/scripts/edict_tasks_init.py --path . --demo
 ```
 
 启动 OpenCode，对它说：
@@ -45,9 +45,9 @@ edict-opencode/
     shangshu/                     # 尚书省：派发六部、汇总
     libu/ hubu/ bingbu/           # 六部：文档/数据/代码
     xingbu/ gongbu/ libu_hr/      # 六部：测试/基建/协调
-  scripts/
+  scripts/                          # 源脚本（安装时复制到项目 .edict/scripts/）
     edict_tasks_api.py            # 任务 API（create/advance/review/progress/...）
-    edict_tasks_init.py           # 初始化 edict-tasks.json
+    edict_tasks_init.py           # 初始化 .edict/edict-tasks.json
   agent_config.json               # 权限矩阵
   docs/DESIGN.md                  # 完整设计文档
   install.sh / install.ps1        # 一键安装脚本
@@ -73,7 +73,7 @@ Pending → Taizi → Zhongshu → Menxia → Assigned → Doing → Review → 
 
 ### 制度保障
 
-- 所有状态推进通过 `edict_tasks_api.py`，不允许直接修改 JSON
+- 所有状态推进通过 `.edict/scripts/edict_tasks_api.py`，不允许直接修改 JSON
 - 门下省必审，中书方案不可跳过审议
 - 权限校验自动拦截越权调用
 

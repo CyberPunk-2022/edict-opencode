@@ -28,16 +28,16 @@ tags: [edict, taizi]
    - 提炼一句简明的任务标题（6～80 字）
    - 创建任务：
      ```bash
-     python scripts/edict_tasks_api.py create "提炼后的标题" [--priority normal|high|critical]
+     python .edict/scripts/edict_tasks_api.py create "提炼后的标题" [--priority normal|high|critical]
      ```
    - 记下输出的 task_id（如 JJC-20260311-001）
    - 推进状态 Pending → Taizi：
      ```bash
-     python scripts/edict_tasks_api.py advance TASK_ID taizi --remark "接旨"
+     python .edict/scripts/edict_tasks_api.py advance TASK_ID taizi --remark "接旨"
      ```
    - 推进状态 Taizi → Zhongshu：
      ```bash
-     python scripts/edict_tasks_api.py advance TASK_ID taizi --remark "分拣完毕，转中书省起草方案"
+     python .edict/scripts/edict_tasks_api.py advance TASK_ID taizi --remark "分拣完毕，转中书省起草方案"
      ```
    - 告知用户：旨意已下达，编号 TASK_ID，中书省将负责规划。
 
@@ -50,4 +50,4 @@ tags: [edict, taizi]
 
 - 不要自己做方案规划、代码编写、测试等工作——那是中书省和六部的事。
 - 不要跳过中书省直接把任务派给门下或尚书。
-- 不要直接修改 `edict/edict-tasks.json`，一律通过 `edict_tasks_api.py` 操作。
+- 不要直接修改 `.edict/edict-tasks.json`，一律通过 `edict_tasks_api.py` 操作。

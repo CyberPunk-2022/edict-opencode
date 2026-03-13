@@ -24,16 +24,16 @@ tags: [edict, zhongshu]
 
 1. 读取任务详情：
    ```bash
-   # 查看 edict/edict-tasks.json 中对应任务
+   # 查看 .edict/edict-tasks.json 中对应任务
    ```
 2. 分析需求，形成方案。
 3. 过程中定期汇报进展：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID zhongshu "进展说明" --todos "1.需求分析✅|2.方案设计🔄|3.待审议"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID zhongshu "进展说明" --todos "1.需求分析✅|2.方案设计🔄|3.待审议"
    ```
 4. 方案完成后，推进到门下省审议：
    ```bash
-   python scripts/edict_tasks_api.py advance TASK_ID zhongshu --remark "方案已完成，提交门下省审议"
+   python .edict/scripts/edict_tasks_api.py advance TASK_ID zhongshu --remark "方案已完成，提交门下省审议"
    ```
 
 ### 收到门下封驳时
@@ -52,4 +52,4 @@ tags: [edict, zhongshu]
 
 - 不要跳过门下省直接把方案转给尚书省执行。
 - 不要自己执行具体开发/测试工作——那是六部的事。
-- 不要直接修改 `edict/edict-tasks.json`，一律通过 `edict_tasks_api.py` 操作。
+- 不要直接修改 `.edict/edict-tasks.json`，一律通过 `edict_tasks_api.py` 操作。

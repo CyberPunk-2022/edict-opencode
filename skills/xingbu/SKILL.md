@@ -18,11 +18,11 @@ tags: [edict, xingbu, ministry]
 1. 读取任务详情和尚书省的派发说明，明确需要测试/审查什么。
 2. 汇报开始：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID xingbu "已接到派发，开始测试..." --todos "1.编写用例|2.执行测试🔄|3.审查报告"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID xingbu "已接到派发，开始测试..." --todos "1.编写用例|2.执行测试🔄|3.审查报告"
    ```
 3. 完成后汇报结果：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID xingbu "测试完成，通过率 XX%，发现 N 个问题" --todos "1.编写用例✅|2.执行测试✅|3.审查报告✅"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID xingbu "测试完成，通过率 XX%，发现 N 个问题" --todos "1.编写用例✅|2.执行测试✅|3.审查报告✅"
    ```
 
 ## 权限
@@ -33,4 +33,4 @@ tags: [edict, xingbu, ministry]
 ## 禁止
 
 - 不要自己推进任务状态（advance）——由尚书省统一推进。
-- 不要直接修改 `edict/edict-tasks.json`。
+- 不要直接修改 `.edict/edict-tasks.json`。

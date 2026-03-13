@@ -13,7 +13,7 @@
   cancel   <task_id> <caller_agent> [--reason "..."]  取消
   can_dispatch_to <from_agent> <to_agent>  校验权限，退出码 0 表示允许
 
-任务文件路径：当前目录下 edict/edict-tasks.json，或环境变量 EDICT_TASKS_PATH。
+任务文件路径：当前目录下 .edict/edict-tasks.json，或环境变量 EDICT_TASKS_PATH。
 权限配置：脚本所在仓库根目录的 agent_config.json（edict-opencode/agent_config.json）。
 """
 
@@ -75,6 +75,27 @@ _STATE_ORG_MAP = {
     "Blocked": "阻塞",
 }
 
+# 状态码 -> 中文显示标签（用户可见输出）
+_STATE_LABEL_CN = {
+    "Pending": "待处理",
+    "Taizi": "太子分拣",
+    "Zhongshu": "中书省起草",
+    "Menxia": "门下省审议",
+    "Assigned": "尚书省派发",
+    "Doing": "六部执行中",
+    "Next": "待执行",
+    "Review": "尚书省汇总",
+    "Done": "已完成",
+    "Cancelled": "已取消",
+    "Blocked": "已阻塞",
+}
+
+
+def _label(state):
+    """返回状态的中文标签，格式：中文标签(State)"""
+    cn = _STATE_LABEL_CN.get(state, state)
+    return f"{cn}({state})"
+
 
 def _script_dir():
     return Path(__file__).resolve().parent
@@ -91,10 +112,10 @@ def _find_tasks_path():
         return p
     cwd = Path.cwd()
     for d in [cwd, cwd.parent]:
-        f = d / "edict" / "edict-tasks.json"
+        f = d / ".edict" / "edict-tasks.json"
         if f.is_file():
             return str(f)
-    return str(cwd / "edict" / "edict-tasks.json")
+    return str(cwd / ".edict" / "edict-tasks.json")
 
 
 def _load_agent_config():
@@ -149,10 +170,13 @@ def can_dispatch_to(from_agent: str, to_agent: str) -> bool:
 
 def cmd_can_dispatch(from_agent: str, to_agent: str) -> int:
     ok = can_dispatch_to(from_agent, to_agent)
+    cfg = _load_agent_config()
+    from_label = next((a.get("label", from_agent) for a in cfg.get("agents", []) if a.get("id") == from_agent), from_agent)
+    to_label = next((a.get("label", to_agent) for a in cfg.get("agents", []) if a.get("id") == to_agent), to_agent)
     if ok:
-        print("OK", flush=True)
+        print(f"✅ 允许：{from_label}({from_agent}) → {to_label}({to_agent})", flush=True)
         return 0
-    print(f"FORBIDDEN: {from_agent} cannot dispatch to {to_agent}", file=sys.stderr, flush=True)
+    print(f"🚫 禁止：{from_label}({from_agent}) 无权调用 {to_label}({to_agent})", file=sys.stderr, flush=True)
     return 1
 
 
@@ -195,7 +219,7 @@ def cmd_create(title: str, priority: str = "normal") -> int:
     }
     tasks_list.insert(0, task)
     _save_tasks(path, tasks_list, meta)
-    print(task_id, flush=True)
+    print(f"{task_id} | 状态：{_label('Pending')} | 📜 旨意已下达", flush=True)
     return 0
 
 
@@ -210,11 +234,11 @@ def cmd_advance(task_id: str, caller_agent: str, remark: str = "") -> int:
         return 1
     state = task.get("state")
     if state in ("Done", "Cancelled"):
-        print(f"ERROR: task {task_id} already in terminal state {state}.", file=sys.stderr)
+        print(f"ERROR: 任务 {task_id} 已处于终态 {_label(state)}，无法推进。", file=sys.stderr)
         return 1
     flow = _STATE_FLOW.get(state)
     if not flow:
-        print(f"ERROR: no next state for {state}.", file=sys.stderr)
+        print(f"ERROR: 当前状态 {_label(state)} 无法继续推进。", file=sys.stderr)
         return 1
     next_state, from_dept, to_dept, desc = flow
     # 权限：当前负责该状态的 agent 才能推进（caller 应对应 state 的负责人）
@@ -222,7 +246,10 @@ def cmd_advance(task_id: str, caller_agent: str, remark: str = "") -> int:
     if allowed_agent is None and state in ("Doing", "Next"):
         allowed_agent = _ORG_AGENT_MAP.get(task.get("org", ""))
     if allowed_agent and caller_agent != allowed_agent:
-        print(f"ERROR: only {allowed_agent} can advance from {state}, caller is {caller_agent}.", file=sys.stderr)
+        cfg = _load_agent_config()
+        allowed_label = next((a.get("label", allowed_agent) for a in cfg.get("agents", []) if a.get("id") == allowed_agent), allowed_agent)
+        caller_label = next((a.get("label", caller_agent) for a in cfg.get("agents", []) if a.get("id") == caller_agent), caller_agent)
+        print(f"ERROR: {_label(state)} 仅允许 {allowed_label}({allowed_agent}) 推进，当前调用者为 {caller_label}({caller_agent})。", file=sys.stderr)
         return 1
     now = _now_iso()
     task["state"] = next_state
@@ -233,7 +260,7 @@ def cmd_advance(task_id: str, caller_agent: str, remark: str = "") -> int:
         "at": now, "from": from_dept, "to": to_dept, "remark": remark or desc
     })
     _save_tasks(path, tasks_list, meta)
-    print(f"{state} -> {next_state}", flush=True)
+    print(f"{_label(state)} → {_label(next_state)}", flush=True)
     return 0
 
 
@@ -273,7 +300,12 @@ def cmd_review(task_id: str, caller_agent: str, action: str, comment: str = "") 
         })
     task["updatedAt"] = now
     _save_tasks(path, tasks_list, meta)
-    print(task["state"], flush=True)
+    result = _label(task["state"])
+    if action == "approve":
+        print(f"✅ 准奏 → {result}", flush=True)
+    else:
+        round_n = task.get("reviewRound", 1)
+        print(f"🚫 封驳（第{round_n}轮）→ {result}", flush=True)
     return 0
 
 
@@ -291,7 +323,7 @@ def cmd_flow(task_id: str, from_dept: str, to_dept: str, remark: str) -> int:
     })
     task["updatedAt"] = _now_iso()
     _save_tasks(path, tasks_list, meta)
-    print("OK", flush=True)
+    print(f"📋 流转已记录 | {from_dept} → {to_dept}", flush=True)
     return 0
 
 
@@ -336,7 +368,7 @@ def cmd_progress(task_id: str, caller_agent: str, text: str, todos: str = "") ->
     if task.get("_scheduler"):
         task["_scheduler"]["lastProgressAt"] = now
     _save_tasks(path, tasks_list, meta)
-    print("OK", flush=True)
+    print(f"📝 进展已记录 | {label} → {_label(task.get('state'))}", flush=True)
     return 0
 
 
@@ -350,15 +382,16 @@ def cmd_stop(task_id: str, caller_agent: str, reason: str = "") -> int:
         print(f"ERROR: task {task_id} not found.", file=sys.stderr)
         return 1
     if task.get("state") in ("Done", "Cancelled"):
-        print("ERROR: task already terminal.", file=sys.stderr)
+        print("ERROR: 任务已终结，无法叫停。", file=sys.stderr)
         return 1
-    task["_prev_state"] = task.get("state")
+    prev = task.get("state")
+    task["_prev_state"] = prev
     task["state"] = "Blocked"
     task["block"] = reason or "已叫停"
     task["now"] = reason or "已叫停"
     task["updatedAt"] = _now_iso()
     _save_tasks(path, tasks_list, meta)
-    print("OK", flush=True)
+    print(f"⏸️ 已叫停 | {_label(prev)} → {_label('Blocked')}", flush=True)
     return 0
 
 
@@ -372,7 +405,7 @@ def cmd_resume(task_id: str, caller_agent: str, reason: str = "") -> int:
         print(f"ERROR: task {task_id} not found.", file=sys.stderr)
         return 1
     if task.get("state") != "Blocked":
-        print("ERROR: task is not stopped.", file=sys.stderr)
+        print("ERROR: 任务未处于阻塞状态，无法恢复。", file=sys.stderr)
         return 1
     prev = task.get("_prev_state") or "Taizi"
     task["state"] = prev
@@ -382,7 +415,7 @@ def cmd_resume(task_id: str, caller_agent: str, reason: str = "") -> int:
     task["_prev_state"] = None
     task["updatedAt"] = _now_iso()
     _save_tasks(path, tasks_list, meta)
-    print("OK", flush=True)
+    print(f"▶️ 已恢复 | {_label('Blocked')} → {_label(prev)}", flush=True)
     return 0
 
 
@@ -395,6 +428,7 @@ def cmd_cancel(task_id: str, caller_agent: str, reason: str = "") -> int:
     if not task:
         print(f"ERROR: task {task_id} not found.", file=sys.stderr)
         return 1
+    prev = task.get("state")
     task["state"] = "Cancelled"
     task["now"] = reason or "已取消"
     task["updatedAt"] = _now_iso()
@@ -402,7 +436,7 @@ def cmd_cancel(task_id: str, caller_agent: str, reason: str = "") -> int:
         "at": task["updatedAt"], "from": task.get("org", ""), "to": "-", "remark": reason or "任务取消"
     })
     _save_tasks(path, tasks_list, meta)
-    print("OK", flush=True)
+    print(f"❌ 已取消 | {_label(prev)} → {_label('Cancelled')}", flush=True)
     return 0
 
 

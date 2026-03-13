@@ -5,7 +5,7 @@
 
 用法:
   python edict_tasks_init.py [--path DIR] [--demo]
-  --path  输出目录，默认当前目录；会在该目录下创建 edict/edict-tasks.json
+  --path  输出目录，默认当前目录；会在该目录下创建 .edict/edict-tasks.json
   --demo  写入一条 Pending 状态的示例任务
 """
 
@@ -54,12 +54,12 @@ def new_task(task_id: str, title: str, priority: str = "normal") -> dict:
 
 def main():
     ap = argparse.ArgumentParser(description="Initialize edict-tasks.json for OpenCode edict")
-    ap.add_argument("--path", default=".", help="Project root; creates <path>/edict/edict-tasks.json")
+    ap.add_argument("--path", default=".", help="Project root; creates <path>/.edict/edict-tasks.json")
     ap.add_argument("--demo", action="store_true", help="Add one demo task in Pending state")
     args = ap.parse_args()
 
     root = os.path.abspath(args.path)
-    edict_dir = os.path.join(root, "edict")
+    edict_dir = os.path.join(root, ".edict")
     os.makedirs(edict_dir, exist_ok=True)
     out_path = os.path.join(edict_dir, "edict-tasks.json")
 

@@ -28,12 +28,12 @@ tags: [edict, menxia]
 
 **准奏**（方案可行，允许执行）：
 ```bash
-python scripts/edict_tasks_api.py review TASK_ID menxia approve --comment "准奏说明，如有改进建议一并附上"
+python .edict/scripts/edict_tasks_api.py review TASK_ID menxia approve --comment "准奏说明，如有改进建议一并附上"
 ```
 
 **封驳**（方案有明显不足，需返回修改）：
 ```bash
-python scripts/edict_tasks_api.py review TASK_ID menxia reject --comment "封驳原因 + 具体修改建议"
+python .edict/scripts/edict_tasks_api.py review TASK_ID menxia reject --comment "封驳原因 + 具体修改建议"
 ```
 
 ### 封驳策略
@@ -51,4 +51,4 @@ python scripts/edict_tasks_api.py review TASK_ID menxia reject --comment "封驳
 
 - 不要自己修改方案——那是中书省的事。
 - 不要自己派发执行——那是尚书省的事。
-- 不要直接修改 `edict/edict-tasks.json`，一律通过 `edict_tasks_api.py` 操作。
+- 不要直接修改 `.edict/edict-tasks.json`，一律通过 `edict_tasks_api.py` 操作。

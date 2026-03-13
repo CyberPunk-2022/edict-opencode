@@ -18,11 +18,11 @@ tags: [edict, hubu, ministry]
 1. 读取任务详情和尚书省的派发说明，明确数据需求。
 2. 汇报开始：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID hubu "已接到派发，开始数据分析..." --todos "1.数据采集|2.分析处理🔄|3.生成报告"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID hubu "已接到派发，开始数据分析..." --todos "1.数据采集|2.分析处理🔄|3.生成报告"
    ```
 3. 完成后汇报结果：
    ```bash
-   python scripts/edict_tasks_api.py progress TASK_ID hubu "数据分析完成，报告已生成" --todos "1.数据采集✅|2.分析处理✅|3.生成报告✅"
+   python .edict/scripts/edict_tasks_api.py progress TASK_ID hubu "数据分析完成，报告已生成" --todos "1.数据采集✅|2.分析处理✅|3.生成报告✅"
    ```
 
 ## 权限
@@ -33,4 +33,4 @@ tags: [edict, hubu, ministry]
 ## 禁止
 
 - 不要自己推进任务状态（advance）——由尚书省统一推进。
-- 不要直接修改 `edict/edict-tasks.json`。
+- 不要直接修改 `.edict/edict-tasks.json`。
