@@ -47,9 +47,16 @@ rm -rf "${SKILLS_DIR}/edict"
 ln -s "${SOURCE_DIR}/.opencode/plugins/edict.js" "${PLUGINS_DIR}/edict.js"
 ln -s "${SOURCE_DIR}/skills"                      "${SKILLS_DIR}/edict"
 
+VERSION_FILE="${SOURCE_DIR}/VERSION"
+VERSION="unknown"
+if [ -f "${VERSION_FILE}" ]; then
+  VERSION="$(cat "${VERSION_FILE}" | tr -d '[:space:]')"
+fi
+
 echo ""
-echo "Done! edict-opencode installed."
+echo "Done! edict-opencode v${VERSION} installed."
 echo ""
+echo "  Version: ${VERSION}"
 echo "  Plugin : ${PLUGINS_DIR}/edict.js"
 echo "  Skills : ${SKILLS_DIR}/edict"
 echo ""

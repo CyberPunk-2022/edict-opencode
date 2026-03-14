@@ -68,9 +68,13 @@ New-Item -ItemType Junction `
     -Path   $skillLink `
     -Target (Join-Path $sourceDir "skills") | Out-Null
 
+$versionFile = Join-Path $sourceDir "VERSION"
+$version = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { "unknown" }
+
 Write-Host ""
-Write-Host "Done! edict-opencode installed."
+Write-Host "Done! edict-opencode v$version installed."
 Write-Host ""
+Write-Host "  Version: $version"
 Write-Host "  Plugin : $pluginLink"
 Write-Host "  Skills : $skillLink"
 Write-Host ""

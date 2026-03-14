@@ -115,7 +115,13 @@ function getBootstrapContent(directory) {
   const phaseHint = detectEdictPhase(directory);
   const orchestratorContent = loadOrchestratorSkill();
 
-  const directive = `## 三省六部任务编排（Edict for OpenCode）
+  let version = 'unknown';
+  try {
+    const vf = path.join(pluginRoot, 'VERSION');
+    if (fs.existsSync(vf)) version = fs.readFileSync(vf, 'utf8').trim();
+  } catch { /* ignore */ }
+
+  const directive = `## 三省六部任务编排（Edict for OpenCode v${version}）
 
 **语言要求：你必须全程使用中文输出。包括但不限于：对话内容、阶段标题、Shell 命令描述、进展说明等，一律使用中文。唯一例外是代码和命令本身。**
 
