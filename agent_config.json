@@ -3,12 +3,13 @@
     { "id": "taizi", "label": "太子", "allowAgents": ["zhongshu"] },
     { "id": "zhongshu", "label": "中书省", "allowAgents": ["menxia", "shangshu"] },
     { "id": "menxia", "label": "门下省", "allowAgents": ["shangshu", "zhongshu"] },
-    { "id": "shangshu", "label": "尚书省", "allowAgents": ["libu", "hubu", "bingbu", "xingbu", "gongbu", "libu_hr"] },
+    { "id": "shangshu", "label": "尚书省", "allowAgents": ["libu", "hubu", "bingbu", "xingbu", "gongbu", "libu_hr", "zaochao"] },
     { "id": "libu", "label": "礼部", "allowAgents": [] },
     { "id": "hubu", "label": "户部", "allowAgents": [] },
     { "id": "bingbu", "label": "兵部", "allowAgents": [] },
     { "id": "xingbu", "label": "刑部", "allowAgents": [] },
     { "id": "gongbu", "label": "工部", "allowAgents": [] },
-    { "id": "libu_hr", "label": "吏部", "allowAgents": [] }
+    { "id": "libu_hr", "label": "吏部", "allowAgents": [] },
+    { "id": "zaochao", "label": "钦天监", "allowAgents": [] }
   ]
 }

@@ -42,9 +42,10 @@ edict-opencode/
     taizi/                        # 太子：分拣旨意
     zhongshu/                     # 中书省：规划方案
     menxia/                       # 门下省：审议（准奏/封驳）
-    shangshu/                     # 尚书省：派发六部、汇总
+    shangshu/                     # 尚书省：派发七部、汇总
     libu/ hubu/ bingbu/           # 六部：文档/数据/代码
     xingbu/ gongbu/ libu_hr/      # 六部：测试/基建/协调
+    zaochao/                      # 钦天监（早朝官）：简报与情报
   scripts/                          # 源脚本（安装时复制到项目 .edict/scripts/）
     edict_tasks_api.py            # 任务 API（create/advance/review/progress/...）
     edict_tasks_init.py           # 初始化 .edict/edict-tasks.json
@@ -68,8 +69,8 @@ Pending → Taizi → Zhongshu → Menxia → Assigned → Doing → Review → 
 - **太子** → 仅可调用中书省
 - **中书省** → 仅可调用门下省、尚书省
 - **门下省** → 仅可调用尚书省、中书省（封驳回调）
-- **尚书省** → 仅可调用六部
-- **六部** → 不可越权调用其他 agent
+- **尚书省** → 仅可调用七部（礼户兵刑工吏 + 钦天监）
+- **六部 + 钦天监** → 不可越权调用其他 agent
 
 ### 制度保障
 

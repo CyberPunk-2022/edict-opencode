@@ -68,6 +68,7 @@ _ORG_AGENT_MAP = {
     "刑部": "xingbu",
     "工部": "gongbu",
     "吏部": "libu_hr",
+    "钦天监": "zaochao",
     "中书省": "zhongshu",
     "门下省": "menxia",
     "尚书省": "shangshu",

@@ -147,14 +147,14 @@ function getBootstrapContent(directory) {
             python .edict/scripts/edict_tasks_api.py review TASK_ID menxia approve --comment "准奏"
 【尚书省派发】派发执行：
             python .edict/scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "派发执行"
-【六部执行】以六部身份执行具体工作（写代码/文档/测试等），用 progress 汇报，完成后：
-            python .edict/scripts/edict_tasks_api.py advance TASK_ID <六部id> --remark "执行完毕"
+【六部/钦天监执行】以六部或钦天监身份执行具体工作（写代码/文档/测试/简报等），用 progress 汇报，完成后：
+            python .edict/scripts/edict_tasks_api.py advance TASK_ID <六部或zaochao的id> --remark "执行完毕"
 【尚书省汇总】汇总结果：
             python .edict/scripts/edict_tasks_api.py advance TASK_ID shangshu --remark "汇总完成"
 \`\`\`
 
-**重要：输出阶段标题时，必须使用中文名称**（如"太子分拣"、"中书省起草"、"门下省审议"、"尚书省派发"、"六部执行"、"尚书省汇总"）。
-禁止使用英文状态码（Taizi、Zhongshu、Menxia、Libu 等）作为标题或标签。`;
+**重要：输出阶段标题时，必须使用中文名称**（如"太子分拣"、"中书省起草"、"门下省审议"、"尚书省派发"、"六部/钦天监执行"、"尚书省汇总"）。
+禁止使用英文状态码（Taizi、Zhongshu、Menxia、Libu 等）作为标题或标签。尚书省可派发至：礼部、户部、兵部、刑部、工部、吏部、钦天监（早朝官）。`;
 
   const toolMapping = `### OpenCode 工具映射
 
